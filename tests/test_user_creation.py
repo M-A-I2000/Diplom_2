@@ -11,12 +11,19 @@ class TestUserCreation:
     @allure.description("Проверяем успешный сценарий создания нового пользователя через API."
                         "Система должна вернуть - Статус‑код ответа: 200 OK, поле `success` в ответе: `true`."
     )
-    def test_create_user_success(self, create_new_user_and_return_token_and_data):
-        response, _ , _ = create_new_user_and_return_token_and_data
+    def test_create_user_success(self):
+        payload = new_user_data()
+        with allure.step("Создаем пользователя через API запрос и получаем его токен"):
+            response = requests.post(CREATE_USER_ENDPOINT, json=payload)
+        with allure.step("Получаем токен пользователя"):
+            token = response.json().get("accessToken")
 
         with allure.step("Проверка успешного ответа"):
             assert response.status_code == 200
             assert response.json().get("success") is True
+
+        with allure.step("Удаляем пользователя по токену"):
+            delete_user(token)
 
 
     @allure.title("Ошибка при создании пользователя с такими же данными")
